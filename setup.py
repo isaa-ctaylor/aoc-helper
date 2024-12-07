@@ -10,7 +10,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="AoC-helper",
-    version="2023.12.01",
+    version="2024.12.07",
     description="A small AoC helper package",
     long_description=README,
     long_description_content_type="text/markdown",
