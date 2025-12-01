@@ -1,19 +1,16 @@
 import os
+import typing
 
 import requests
 
-RED = "\x1b[31m"
-BOLD = "\x1b[1m"
-RESET = "\x1b[0m"
-
 
 def no_token():
-    print(
-        f"{BOLD}{RED}Could not find token, please follow https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup to add it{RESET}"
+    raise FileNotFoundError(
+        f"Could not find token, please follow https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup to add it"
     )
-    os._exit(0)
 
 
+TOKEN: typing.Optional[str] = None
 try:
     with open(os.path.expanduser("~/.aoc/.token"), "r") as f:
         TOKEN = f.read()
@@ -33,11 +30,15 @@ def get_input(year: int, day: int):
             return f.read()
 
     r = requests.get(
-        f"https://adventofcode.com/{year}/day/{day}/input", cookies={"session": TOKEN}
+        f"https://adventofcode.com/{year}/day/{day}/input", cookies={"session": TOKEN}  # type: ignore
     )
     if r.status_code == 400:
-        print(
-            f"{BOLD}{RED}Request failed, please check your token (https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup){RESET}"
+        raise Exception(
+            f"Request failed, please check your token (https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup)"
+        )
+    if r.status_code == 404:
+        raise Exception(
+            f"Input not available, are you sure the day is correct and the puzzle is unlocked?"
         )
     if r.status_code == 200:
         ret = r.text
@@ -49,22 +50,18 @@ def get_input(year: int, day: int):
             f.write(ret)
         return ret
     else:
-        raise Exception("An error occured ¯\_(ツ)_/¯")
+        raise Exception(r"An error occured ¯\_(ツ)_/¯")
 
 
 def submit(year: int, day: int, part: int, answer: str):
     r = requests.post(
         f"https://adventofcode.com/{year}/day/{day}/answer",
-        cookies={"session": TOKEN},
+        cookies={"session": TOKEN},  # type: ignore
         data={"level": part, "answer": answer},
     )
     if r.status_code == 400:
-        print(
-            f"{BOLD}{RED}Request failed, please check your token (https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup){RESET}"
+        raise Exception(
+            f"Request failed, please check your token (https://github.com/isaa-ctaylor/aoc-helper/blob/master/README.md#setup)"
         )
     if r.status_code == 200:
         print(r.text)
-
-
-if __name__ == "__main__":
-    print(get_input(2023, 1))
